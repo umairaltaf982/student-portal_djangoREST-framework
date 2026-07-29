@@ -3,13 +3,11 @@ from student_app import views
 from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = [
-    path("students/", views.student_list),
-    path("students/<int:pk>/", views.student_detail)
+    path("students/", views.StudentList),
+    path("students/<int:pk>/", views.StudentDetail)
 ]
 
-"""
 urlpatterns = format_suffix_patterns(urlpatterns)
-"""
 
 # it is used when the user wants to change the request type. 
 # for example: instead of json he want to use html request
