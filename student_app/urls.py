@@ -10,6 +10,7 @@ urlpatterns = [
 """
 urlpatterns = format_suffix_patterns(urlpatterns)
 """
+
 # it is used when the user wants to change the request type. 
 # for example: instead of json he want to use html request
 # to apply this we also need to change our view methods to:
