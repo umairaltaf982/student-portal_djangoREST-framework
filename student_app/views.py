@@ -1,54 +1,69 @@
 from student_app.models import Student
 from student_app.serializers import StudentSerializer
-from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import generics
+from rest_framework import mixins
 
-class StudentList(APIView):
-    """
-    List all students, or create a new student.
-    """
+"""
+List all students, or create a new student.
+"""
 
-    def get(self, request, format=None):
-        students = Student.objects.all()
-        serializer = StudentSerializer(students, many=True)
-        return Response(serializer.data)
+class StudentList(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView
+):
 
-    def post(self, request, format=None):
-        serializer = StudentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
 
 
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
-class StudentDetail(APIView):
-    """
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+"""
     Retrieve, update or delete a student instance.
-    """
+"""
+class StudentDetail(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
 
-    def get_object(self, pk):
-        try:
-            return Student.objects.get(pk=pk)
-        except Student.DoesNotExist:
-            raise Http404
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
 
-    def get(self, request, pk, format=None):
-        student = self.get_object(pk)
-        serializer = StudentSerializer(student)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
-    def put(self, request, pk, format=None):
-        student = self.get_object(pk)
-        serializer = StudentSerializer(student, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
-    def delete(self, request, pk, format=None):
-        student = self.get_object(pk)
-        student.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+
+# Or if we want to make our code more generic
+# Using the mixin classes we've rewritten the views to use slightly less code than before, 
+# but we can go one step further. REST framework provides a set of already mixed-in generic views 
+# that we can use to trim down our views.py module even more.
+
+"""
+from student_app.models import Student
+from student_app.serializers import StudentSerializer
+from rest_framework import generics
+
+
+class StudentList(generics.ListCreateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+
+class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+"""
