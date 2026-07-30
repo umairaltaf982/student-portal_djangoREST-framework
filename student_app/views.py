@@ -2,6 +2,8 @@ from student_app.models import Student
 from student_app.serializers import StudentSerializer
 from rest_framework import generics
 from rest_framework import mixins
+from django.contrib.auth.models import User
+from student_app.serializers import UserSerializer
 
 """
 List all students, or create a new student.
@@ -67,3 +69,15 @@ class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
 """
+
+
+
+# added for the authentication and permissions
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Student
+# added for the authentication and permissions
+from django.contrib.auth.models import User
 
 class StudentSerializer(serializers.ModelSerializer):
 
@@ -15,3 +17,15 @@ class StudentSerializer(serializers.ModelSerializer):
                 "Name must contain atleast 3 characters!!!"
             )
         return value
+
+
+# added for the authentication and permissions
+
+class UserSerializer(serializers.ModelSerializer):
+    snippets = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Student.objects.all()
+    )
+
+    class Meta:
+        model = User
+        fields = ["name", "email", "description"]

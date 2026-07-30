@@ -22,6 +22,11 @@ class Student(models.Model):
         default=genderChoices.PREFER_NOT_TO_SAY,
     )
 
+# added owner new field for the authentication and permissions
+    owner = models.ForeignKey(
+        "auth.User", related_name="students", on_delete=models.CASCADE
+    )
+
     # for model configuration, we write the class Meta to make the database's data to look like the way we want
     class Meta:
         ordering = ["-id"]              # '-' is used for decending
