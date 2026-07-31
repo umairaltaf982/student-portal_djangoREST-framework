@@ -18,14 +18,16 @@ class StudentSerializer(serializers.ModelSerializer):
             )
         return value
 
+# for authentication and permissions only
+    owner = serializers.ReadOnlyField(source="owner.username")
+
 
 # added for the authentication and permissions
-
 class UserSerializer(serializers.ModelSerializer):
-    snippets = serializers.PrimaryKeyRelatedField(
+    students = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Student.objects.all()
     )
 
     class Meta:
         model = User
-        fields = ["name", "email", "description"]
+        fields = "__all__"
