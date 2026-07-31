@@ -4,6 +4,8 @@ from rest_framework import generics
 from rest_framework import mixins
 from django.contrib.auth.models import User
 from student_app.serializers import UserSerializer
+# for authentication and permissions only
+from rest_framework import permissions
 
 """
 List all students, or create a new student.
@@ -24,6 +26,12 @@ class StudentList(
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+# for authentication and permissions
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 """
     Retrieve, update or delete a student instance.
@@ -46,8 +54,9 @@ class StudentDetail(
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
-
-
+        
+# for authentication and permissions
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 # Or if we want to make our code more generic
 # Using the mixin classes we've rewritten the views to use slightly less code than before, 

@@ -22,3 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("student_app.urls"))
 ]
+
+# added for the authentication and permissions
+urlpatterns += [
+    path("api-auth/", include("rest_framework.urls")),
+]
