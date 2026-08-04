@@ -6,11 +6,29 @@ from django.contrib.auth.models import User
 from student_app.serializers import UserSerializer
 # for authentication and permissions only
 from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
+# For downloading CSV 
+import csv
+from django.http import HttpResponse
+from rest_framework.views import APIView
+
+
+class IsOwnerOrReadOnly(BasePermission):
+    """
+    Only the owner of the student record can edit or delete it.
+    Everyone else gets read-only access.
+    """
+    def has_object_permission(self, request, view, obj):
+        # GET, HEAD, OPTIONS are allowed for anyone
+        if request.method in SAFE_METHODS:
+            return True
+        # Write permissions only for the owner
+        return obj.owner == request.user
+
 
 """
 List all students, or create a new student.
 """
-
 class StudentList(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -56,29 +74,7 @@ class StudentDetail(
         return self.destroy(request, *args, **kwargs)
         
 # for authentication and permissions
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-# Or if we want to make our code more generic
-# Using the mixin classes we've rewritten the views to use slightly less code than before, 
-# but we can go one step further. REST framework provides a set of already mixed-in generic views 
-# that we can use to trim down our views.py module even more.
-
-"""
-from student_app.models import Student
-from student_app.serializers import StudentSerializer
-from rest_framework import generics
-
-
-class StudentList(generics.ListCreateAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
-
-class StudentDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-"""
-
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 # added for the authentication and permissions
@@ -90,3 +86,30 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+# For downloading CSV
+class StudentCSVDownload(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        students = Student.objects.filter(owner=request.user)
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="my_students.csv"'
+
+        writer = csv.writer(response)
+        # header row
+        writer.writerow(["ID", "Name", "Email", "Gender", "Description"])
+
+        # data rows
+        for student in students:
+            writer.writerow([
+                student.id,
+                student.name,
+                student.email,
+                student.get_gender_display(),
+                student.description,
+            ])
+
+        return response
