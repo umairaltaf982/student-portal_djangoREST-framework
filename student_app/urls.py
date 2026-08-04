@@ -8,7 +8,10 @@ urlpatterns = [
 
 # added for the authentication and permissions
     path("users/", views.UserList.as_view()),
-    path("users/<int:pk>/", views.UserDetail.as_view())
+    path("users/<int:pk>/", views.UserDetail.as_view()),
+# for downloading CSV
+    path("students/download/", views.StudentCSVDownload.as_view()),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
